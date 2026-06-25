@@ -25,16 +25,16 @@ jobs:
         with:
           path: "src"
 
-      - name: Setup JDK 17
+      # FIXED: Upgraded Java to 21 to natively support the bcprov-jdk18on runtime requirements
+      - name: Setup JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # FIXED: Using Gradle 8.2.1 to natively support the stable cloudstream plugin version
       - name: Setup Stable Gradle Distribution
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -52,7 +52,7 @@ jobs:
           
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never"
           
-          # FIXED: Added '-g .gradle_home' to redirect the global cache to a private workspace directory
+          # Kept the localized -g flag to maintain a clean workspace environment
           gradle -g .gradle_home clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
           
           mkdir -p $GITHUB_WORKSPACE/staging_out
