@@ -47,7 +47,8 @@ jobs:
           # Inject version metadata bypass flag natively
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check"
           
-          gradle make makePluginsJson
+          # FIXED: Forced the compiler to ignore old cache entries and parse your clean build scripts fresh
+          gradle make makePluginsJson --no-configuration-cache
           
           # Create an isolated staging folder outside the source stream
           mkdir -p $GITHUB_WORKSPACE/staging_out
