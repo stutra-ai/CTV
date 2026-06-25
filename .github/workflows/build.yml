@@ -45,17 +45,15 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/src
           
-          # Delete any wrapper artifacts forcing version upgrades
           rm -rf .gradle/
           rm -rf gradle/wrapper/
           rm -f gradlew
           rm -f gradlew.bat
           
-          # FIXED: System environment arguments to completely suppress AGP version checks
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never -Dcom.android.gradle.version.check=false"
           
-          # FIXED: Added the version suppression flag directly to the compilation task parameter
-          gradle clean make makePluginsJson -Fcom.android.gradle.version.check=false --no-configuration-cache --no-build-cache --rerun-tasks
+          # FIXED: Swapped out the problematic -F flag for the correct -P project parameter flag
+          gradle clean make makePluginsJson -Pcom.android.gradle.version.check=false --no-configuration-cache --no-build-cache --rerun-tasks
           
           mkdir -p $GITHUB_WORKSPACE/staging_out
           cp **/build/*.cs3 $GITHUB_WORKSPACE/staging_out/ || true
