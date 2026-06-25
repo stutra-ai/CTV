@@ -1,4 +1,3 @@
-#foc
 name: Build
 
 concurrency: 
@@ -21,25 +20,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout the source code repository only
+      # 1. Checkout the source code repository
       - name: Checkout Source
         uses: actions/checkout@v4
         with:
           path: "src"
 
-      # 2. Set up standard JDK compiler environment
+      # 2. Set up stable JDK compiler environment
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
       # 3. Handle Android compilation assets
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # 4. Compile the plugins using the runner's native global gradle tool
+      # FIXED: Force the environment runner to use Gradle 8.7 to match Cloudstream template rules
+      - name: Setup Stable Gradle Distribution
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+          cache-disabled: true
+
+      # 4. Compile the plugins using the pinned Gradle instance
       - name: Build Plugins
         run: |
           cd $GITHUB_WORKSPACE/src
@@ -47,20 +52,19 @@ jobs:
           # Inject version metadata bypass flag natively
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check"
           
-          # FIXED: Added flags to break out of old, stuck configuration caches entirely
+          # Run compilation using explicit cache clearing flags
           gradle make makePluginsJson --no-configuration-cache --rerun-tasks
           
           # Create an isolated staging folder outside the source stream
           mkdir -p $GITHUB_WORKSPACE/staging_out
           cp **/build/*.cs3 $GITHUB_WORKSPACE/staging_out/ || true
           cp build/plugins.json $GITHUB_WORKSPACE/staging_out/ || true
-          
+
       # 5. Clean setup to initialize or update the builds branch dynamically
       - name: Deploy to Builds Branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Create a completely fresh, empty directory for the branch deploy
           mkdir -p $GITHUB_WORKSPACE/deploy_env
           cd $GITHUB_WORKSPACE/deploy_env
           
@@ -68,17 +72,10 @@ jobs:
           git config --local user.name "GitHub Actions"
           git init
           
-          # Check out a totally independent history stream named builds
           git checkout -b builds
-          
-          # Bring the newly compiled files over from the staging folder
           cp -r $GITHUB_WORKSPACE/staging_out/* . || true
-          
           git add .
           
-          # Set up authentication remote tracking URL string
           git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
-          
-          # Commit and force-overwrite the branch target upstream safely
           git commit -m "Build $GITHUB_SHA" || exit 0
           git push origin builds --force
