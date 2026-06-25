@@ -34,11 +34,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # FIXED: Pinned exactly to 9.3.1 to satisfy the Cloudstream plugin requirement perfectly
+      # FIXED: Using Gradle 8.2.1 to natively support the stable cloudstream plugin version
       - name: Setup Stable Gradle Distribution
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.3.1'
+          gradle-version: '8.2.1'
           cache-disabled: true
 
       - name: Build Plugins
