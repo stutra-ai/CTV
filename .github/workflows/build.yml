@@ -47,14 +47,14 @@ jobs:
           # Inject version metadata bypass flag natively
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check"
           
-          # FIXED: Forced the compiler to ignore old cache entries and parse your clean build scripts fresh
-          gradle make makePluginsJson --no-configuration-cache
+          # FIXED: Added flags to break out of old, stuck configuration caches entirely
+          gradle make makePluginsJson --no-configuration-cache --rerun-tasks
           
           # Create an isolated staging folder outside the source stream
           mkdir -p $GITHUB_WORKSPACE/staging_out
           cp **/build/*.cs3 $GITHUB_WORKSPACE/staging_out/ || true
           cp build/plugins.json $GITHUB_WORKSPACE/staging_out/ || true
-
+          
       # 5. Clean setup to initialize or update the builds branch dynamically
       - name: Deploy to Builds Branch
         env:
