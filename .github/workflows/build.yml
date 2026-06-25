@@ -52,8 +52,8 @@ jobs:
           # Inject version metadata bypass flag natively
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check"
           
-          # Run compilation using explicit cache clearing flags
-          gradle make makePluginsJson --no-configuration-cache --rerun-tasks
+          # FIXED: Added clean task alongside cache eviction flags to completely blow away the hidden 9.1.1 settings memory
+          gradle clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
           
           # Create an isolated staging folder outside the source stream
           mkdir -p $GITHUB_WORKSPACE/staging_out
