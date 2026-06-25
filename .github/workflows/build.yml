@@ -25,20 +25,20 @@ jobs:
         with:
           path: "src"
 
-      # FIXED: Upgraded Java to 21 to natively support the bcprov-jdk18on runtime requirements
-      - name: Setup JDK 21
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      # FIXED: Pinned to stable Gradle 8.12 to match our AGP 8.7.3 dependencies cleanly
       - name: Setup Stable Gradle Distribution
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.2.1'
+          gradle-version: '8.12'
           cache-disabled: true
 
       - name: Build Plugins
@@ -52,8 +52,8 @@ jobs:
           
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never"
           
-          # Kept the localized -g flag to maintain a clean workspace environment
-          gradle -g .gradle_home clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
+          # FIXED: Swapped back to standard execution path without the restricted -g argument wrapper
+          gradle clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
           
           mkdir -p $GITHUB_WORKSPACE/staging_out
           cp **/build/*.cs3 $GITHUB_WORKSPACE/staging_out/ || true
