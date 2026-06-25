@@ -50,15 +50,15 @@ jobs:
           rm -f gradlew
           rm -f gradlew.bat
           
+          # FIXED: Forced the Android version check to deactivate at the background system environment layer
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never -Dcom.android.gradle.version.check=false"
           
-          # FIXED: Swapped out the problematic -F flag for the correct -P project parameter flag
-          gradle clean make makePluginsJson -Pcom.android.gradle.version.check=false --no-configuration-cache --no-build-cache --rerun-tasks
+          # Clean run execution command block
+          gradle clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
           
           mkdir -p $GITHUB_WORKSPACE/staging_out
           cp **/build/*.cs3 $GITHUB_WORKSPACE/staging_out/ || true
           cp build/plugins.json $GITHUB_WORKSPACE/staging_out/ || true
-
       - name: Deploy to Builds Branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
