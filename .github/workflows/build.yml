@@ -52,8 +52,8 @@ jobs:
           
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never"
           
-          # FIXED: Added --refresh-dependencies to force-replace the broken jar file in the global cache
-          gradle clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks --refresh-dependencies
+          # FIXED: Added '-g .gradle_home' to redirect the global cache to a private workspace directory
+          gradle -g .gradle_home clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
           
           mkdir -p $GITHUB_WORKSPACE/staging_out
           cp **/build/*.cs3 $GITHUB_WORKSPACE/staging_out/ || true
