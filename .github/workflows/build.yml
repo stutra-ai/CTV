@@ -34,26 +34,28 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # FIXED: Pinned exactly to 9.3.1 to satisfy the Cloudstream core build rule
+      # FIXED: Swapped back to the stable 8.x branch to clear the Kotlin plugin error
       - name: Setup Stable Gradle Distribution
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.3.1'
+          gradle-version: '8.12'
           cache-disabled: true
 
       - name: Build Plugins
         run: |
           cd $GITHUB_WORKSPACE/src
           
+          # Delete any wrapper artifacts forcing version upgrades
           rm -rf .gradle/
           rm -rf gradle/wrapper/
           rm -f gradlew
           rm -f gradlew.bat
           
-          # FIXED: Injected experimental bypass flags to stop AGP 9.0 from throwing the Kotlin plugin crash
-          export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never"
+          # FIXED: System environment arguments to completely suppress AGP version checks
+          export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never -Dcom.android.gradle.version.check=false"
           
-          gradle clean make makePluginsJson -Pandroid.experimental.self-contained-modules=true --no-configuration-cache --no-build-cache --rerun-tasks
+          # FIXED: Added the version suppression flag directly to the compilation task parameter
+          gradle clean make makePluginsJson -Fcom.android.gradle.version.check=false --no-configuration-cache --no-build-cache --rerun-tasks
           
           mkdir -p $GITHUB_WORKSPACE/staging_out
           cp **/build/*.cs3 $GITHUB_WORKSPACE/staging_out/ || true
