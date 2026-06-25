@@ -1,0 +1,8 @@
+{
+  "name": "PCTV Plugins",
+  "description": "18- Cloudstream Extensions",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/stutra-ai/PCTV/builds/plugins.json"
+  ]
+}

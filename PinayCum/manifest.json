@@ -1,0 +1,10 @@
+{
+    "name": "PinayCum",
+    "description": "PinayCum Extension for Cloudstream",
+    "author": "PCTV",
+    "version": 1,
+    "versionCode": 1,
+    "icon": "icon.png",
+    "language": "tl",
+    "pluginClassName": "com.lagradost.PinayCumPlugin"
+}
