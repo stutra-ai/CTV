@@ -34,18 +34,17 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # FIXED: Swapped target to 9.4 to cleanly clear the minimum version check threshold
+      # FIXED: Pinned to 9.5.1 to ensure the version exists and fulfills the AGP 9.x check
       - name: Setup Stable Gradle Distribution
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.4'
+          gradle-version: '9.5.1'
           cache-disabled: true
 
       - name: Build Plugins
         run: |
           cd $GITHUB_WORKSPACE/src
           
-          # Inject version metadata bypass flags directly to process variables
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never"
           
           gradle clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
