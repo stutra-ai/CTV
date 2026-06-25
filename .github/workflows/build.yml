@@ -20,47 +20,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout the source code repository
       - name: Checkout Source
         uses: actions/checkout@v4
         with:
           path: "src"
 
-      # 2. Set up stable JDK compiler environment
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. Handle Android compilation assets
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # FIXED: Force the environment runner to use Gradle 8.7 to match Cloudstream template rules
+      # FIXED: Swapped target to 9.4 to cleanly clear the minimum version check threshold
       - name: Setup Stable Gradle Distribution
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: '9.4'
           cache-disabled: true
 
-      # 4. Compile the plugins using the pinned Gradle instance
       - name: Build Plugins
         run: |
           cd $GITHUB_WORKSPACE/src
           
-          # Inject version metadata bypass flag natively
-          export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check"
+          # Inject version metadata bypass flags directly to process variables
+          export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never"
           
-          # FIXED: Added clean task alongside cache eviction flags to completely blow away the hidden 9.1.1 settings memory
           gradle clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
           
-          # Create an isolated staging folder outside the source stream
           mkdir -p $GITHUB_WORKSPACE/staging_out
           cp **/build/*.cs3 $GITHUB_WORKSPACE/staging_out/ || true
           cp build/plugins.json $GITHUB_WORKSPACE/staging_out/ || true
 
-      # 5. Clean setup to initialize or update the builds branch dynamically
       - name: Deploy to Builds Branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
