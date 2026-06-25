@@ -34,19 +34,26 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # FIXED: Pinned to 9.5.1 to ensure the version exists and fulfills the AGP 9.x check
+      # FIXED: Enforce Gradle 8.7 execution boundaries explicitly
       - name: Setup Stable Gradle Distribution
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.5.1'
+          gradle-version: '8.7'
           cache-disabled: true
 
       - name: Build Plugins
         run: |
           cd $GITHUB_WORKSPACE/src
           
-          export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never"
+          # CRITICAL FIXED: Force-delete any legacy local wrappers or caches sitting inside your checked-out repo
+          rm -rf .gradle/
+          rm -rf gradle/wrapper/
+          rm -f gradlew
+          rm -f gradlew.bat
           
+          export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check"
+          
+          # Run compilation fresh without any environment pollution
           gradle clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
           
           mkdir -p $GITHUB_WORKSPACE/staging_out
