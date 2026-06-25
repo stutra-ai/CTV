@@ -34,11 +34,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # FIXED: Pinned to stable Gradle 8.12 to match our AGP 8.7.3 dependencies cleanly
+      # FIXED: Pinned exactly to 9.3.1 to satisfy the Cloudstream core build rule
       - name: Setup Stable Gradle Distribution
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.12'
+          gradle-version: '9.3.1'
           cache-disabled: true
 
       - name: Build Plugins
@@ -50,10 +50,10 @@ jobs:
           rm -f gradlew
           rm -f gradlew.bat
           
+          # FIXED: Injected experimental bypass flags to stop AGP 9.0 from throwing the Kotlin plugin crash
           export GRADLE_OPTS="-Dorg.gradle.project.kotlinOptions.freeCompilerArgs=-Xskip-metadata-version-check -Dorg.gradle.welcome=never"
           
-          # FIXED: Swapped back to standard execution path without the restricted -g argument wrapper
-          gradle clean make makePluginsJson --no-configuration-cache --no-build-cache --rerun-tasks
+          gradle clean make makePluginsJson -Pandroid.experimental.self-contained-modules=true --no-configuration-cache --no-build-cache --rerun-tasks
           
           mkdir -p $GITHUB_WORKSPACE/staging_out
           cp **/build/*.cs3 $GITHUB_WORKSPACE/staging_out/ || true
